@@ -1,0 +1,41 @@
+---
+title: ERD Final Kelompok 2 - database peminjaman_lab (sumber database/schema.sql)
+---
+erDiagram
+    MAHASISWA ||--o{ TRANSAKSI : "meminjam (fk_transaksi_mahasiswa)"
+    TRANSAKSI ||--|{ DETAIL_TRANSAKSI : "berisi (fk_detail_transaksi)"
+    ALAT ||--o{ DETAIL_TRANSAKSI : "dipinjam di (fk_detail_alat)"
+    MAHASISWA {
+        varchar nim PK "VARCHAR(20)"
+        varchar nama "VARCHAR(60) NOT NULL"
+        varchar no_hp "VARCHAR(16) NULL"
+        enum status_aktif "aktif | tidak aktif"
+    }
+    ALAT {
+        varchar kode PK "VARCHAR(15)"
+        varchar nama "VARCHAR(60) NOT NULL"
+        varchar kategori "VARCHAR(40), index"
+        enum kondisi "baik | rusak ringan | rusak berat"
+        enum status "tersedia | dipinjam | tidak tersedia, index"
+    }
+    TRANSAKSI {
+        varchar id PK "VARCHAR(20), contoh T001"
+        varchar nim FK "index (nim, status)"
+        date tgl_pinjam "NOT NULL"
+        date batas_kembali "CHECK >= tgl_pinjam"
+        enum status "dipinjam | sebagian dikembalikan | selesai"
+    }
+    DETAIL_TRANSAKSI {
+        varchar id_transaksi PK,FK "PK gabungan"
+        varchar kode_alat PK,FK "index (kode_alat, status)"
+        enum status "dipinjam | dikembalikan"
+        enum kondisi_kembali "NULL selama dipinjam"
+        date tgl_kembali "NULL selama dipinjam"
+    }
+    LOG_AKTIVITAS {
+        int id PK "AUTO_INCREMENT"
+        datetime waktu "DEFAULT CURRENT_TIMESTAMP, index"
+        varchar petugas "VARCHAR(50)"
+        varchar aksi "VARCHAR(30)"
+        varchar keterangan "VARCHAR(255)"
+    }
