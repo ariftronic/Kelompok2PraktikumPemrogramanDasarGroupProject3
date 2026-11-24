@@ -1,14 +1,3 @@
-"""Memindahkan data .txt lama (versi sebelum MySQL) ke database, sekali jalan.
-
-Pemakaian (dari folder proyek):
-    python scripts/migrate_txt.py                       # data/*.txt ke database di .env
-    python scripts/migrate_txt.py --sumber data_sampel  # data contoh (5 mahasiswa, 10 alat, 3 transaksi)
-    python scripts/migrate_txt.py --kosongkan           # hapus isi tabel dulu, lalu migrasi ulang
-
-Langkah: baca dan validasi setiap baris dengan dari_baris() model, cek rujukan antarfile, selaraskan status turunan,
-lalu INSERT dalam SATU transaction (mahasiswa, alat, transaksi, detail). Bila jumlah baris di tabel tidak sama dengan
-jumlah baris valid di .txt, semua dibatalkan (ROLLBACK).
-"""
 import argparse
 import os
 import sys
@@ -29,7 +18,6 @@ TABEL = ('mahasiswa', 'alat', 'transaksi', 'detail_transaksi')
 
 
 def baca_data(folder):
-    """Membaca dan memvalidasi keempat file .txt; mengembalikan dict data valid dan list peringatan."""
     fm = FileManager(direktori=folder)
     peringatan = fm.daftar_peringatan
 
@@ -72,7 +60,6 @@ def baca_data(folder):
 
 
 def selaraskan(data):
-    """Menyamakan status turunan (transaksi, alat, mahasiswa) dengan detail transaksi; mengembalikan jumlah perbaikan."""
     perbaikan = 0
     for t in data['transaksi'].values():
         lama = t.status
@@ -96,7 +83,6 @@ def kosong_atau_none(nilai):
 
 
 def masukkan(db, data):
-    """INSERT semua data dalam satu transaction lalu memeriksa jumlah baris; ROLLBACK bila tidak sama."""
     harapan = {'mahasiswa': len(data['mahasiswa']), 'alat': len(data['alat']), 'transaksi': len(data['transaksi']), 'detail_transaksi': sum((len(t.daftar_detail) for t in data['transaksi'].values()))}
     with db.transaksi():
         for m in data['mahasiswa'].values():
@@ -115,14 +101,12 @@ def masukkan(db, data):
 
 
 def kosongkan(db):
-    """Menghapus isi tabel (anak dulu, lalu induk) dalam satu transaction."""
     with db.transaksi():
         for tabel in reversed(TABEL):
             db.eksekusi('DELETE FROM ' + tabel)
 
 
 def main(argv=None, konfigurasi=None):
-    """Menjalankan migrasi; mengembalikan kode keluar (0 berhasil, 1 gagal)."""
     parser = argparse.ArgumentParser(description='Migrasi data .txt ke MySQL.')
     parser.add_argument('--sumber', default='data', help='folder berisi mahasiswa.txt, alat.txt, transaksi.txt, detail_transaksi.txt (bawaan: data)')
     parser.add_argument('--kosongkan', action='store_true', help='hapus isi semua tabel sebelum migrasi')
