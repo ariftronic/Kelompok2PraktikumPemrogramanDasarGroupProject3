@@ -1,9 +1,7 @@
-"""Model Transaksi dan DetailTransaksi: baris di transaksi.txt dan detail_transaksi.txt."""
 from datetime import datetime
 from app.konstanta import NILAI_KOSONG, FORMAT_TANGGAL, DAFTAR_KONDISI, DETAIL_DIPINJAM, DETAIL_DIKEMBALIKAN, TRX_DIPINJAM, TRX_SEBAGIAN, TRX_SELESAI
 
 def teks_tanggal(nilai):
-    """Tanggal dari database (date atau None) menjadi teks YYYY-MM-DD atau '-'."""
     if nilai is None:
         return NILAI_KOSONG
     return nilai.strftime(FORMAT_TANGGAL) if hasattr(nilai, 'strftime') else str(nilai)
@@ -20,7 +18,6 @@ def _periksa_tanggal(nilai, nama_kolom):
     return tanggal
 
 class DetailTransaksi:
-    """Satu alat di dalam sebuah transaksi beserta data pengembaliannya."""
 
     def __init__(self, id_transaksi, kode_alat, status=DETAIL_DIPINJAM, kondisi=NILAI_KOSONG, tgl_kembali=NILAI_KOSONG):
         self.id_transaksi = id_transaksi
@@ -31,7 +28,6 @@ class DetailTransaksi:
 
     @classmethod
     def dari_baris(cls, kolom):
-        """Membuat DetailTransaksi dari list kolom; ValueError bila status, kondisi, atau tanggal tidak valid."""
         _, _, status, kondisi, tgl_kembali = kolom
         if status == DETAIL_DIKEMBALIKAN:
             if kondisi not in DAFTAR_KONDISI:
@@ -46,19 +42,15 @@ class DetailTransaksi:
 
     @classmethod
     def dari_dict(cls, baris):
-        """Membuat DetailTransaksi dari baris tabel detail_transaksi (NULL ditampilkan sebagai '-')."""
         return cls(baris['id_transaksi'], baris['kode_alat'], baris['status'], baris['kondisi_kembali'] or NILAI_KOSONG, teks_tanggal(baris['tgl_kembali']))
 
     def ke_baris(self):
-        """List kolom untuk ditulis ke detail_transaksi.txt."""
         return [self.id_transaksi, self.kode_alat, self.status, self.kondisi, self.tgl_kembali]
 
     def sudah_kembali(self):
-        """True bila alat ini sudah dikembalikan."""
         return self.status == DETAIL_DIKEMBALIKAN
 
     def kembalikan(self, kondisi, tanggal):
-        """Mencatat pengembalian alat: kondisi dan tanggal kembali."""
         self.status = DETAIL_DIKEMBALIKAN
         self.kondisi = kondisi
         self.tgl_kembali = tanggal
@@ -69,7 +61,6 @@ class DetailTransaksi:
         return '%s: %s' % (self.kode_alat, self.status)
 
 class Transaksi:
-    """Satu transaksi peminjaman; daftar_detail berisi satu DetailTransaksi untuk setiap alat (Aturan 3)."""
 
     def __init__(self, id_transaksi, nim, tgl_pinjam, batas_kembali, status=TRX_DIPINJAM):
         self.id_transaksi = id_transaksi
@@ -81,7 +72,6 @@ class Transaksi:
 
     @classmethod
     def dari_baris(cls, kolom):
-        """Membuat Transaksi dari list kolom; ValueError bila status atau tanggal tidak valid."""
         _, _, tgl_pinjam, batas_kembali, status = kolom
         if status not in (TRX_DIPINJAM, TRX_SEBAGIAN, TRX_SELESAI):
             raise ValueError("status transaksi tidak dikenal: '%s'" % status)
@@ -95,25 +85,20 @@ class Transaksi:
 
     @classmethod
     def dari_dict(cls, baris, daftar_detail=()):
-        """Membuat Transaksi dari baris tabel transaksi beserta list DetailTransaksi-nya."""
         transaksi = cls(baris['id'], baris['nim'], teks_tanggal(baris['tgl_pinjam']), teks_tanggal(baris['batas_kembali']), baris['status'])
         transaksi.daftar_detail = list(daftar_detail)
         return transaksi
 
     def ke_baris(self):
-        """List kolom untuk ditulis ke transaksi.txt."""
         return [self.id_transaksi, self.nim, self.tgl_pinjam, self.batas_kembali, self.status]
 
     def baris_detail(self):
-        """List kolom semua detail, untuk ditulis ke detail_transaksi.txt."""
         return [detail.ke_baris() for detail in self.daftar_detail]
 
     def masih_aktif(self):
-        """True selama masih ada alat yang belum dikembalikan (Aturan 4)."""
         return self.status != TRX_SELESAI
 
     def perbarui_status(self):
-        """Status menjadi 'dipinjam', 'sebagian dikembalikan', atau 'selesai' sesuai detailnya."""
         jumlah_kembali = sum((1 for detail in self.daftar_detail if detail.sudah_kembali()))
         if jumlah_kembali == 0:
             self.status = TRX_DIPINJAM
