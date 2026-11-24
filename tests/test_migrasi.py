@@ -1,4 +1,3 @@
-"""Tes scripts/migrate_txt.py: data .txt lama dipindah ke database uji dalam satu transaction."""
 import io
 import os
 import shutil
