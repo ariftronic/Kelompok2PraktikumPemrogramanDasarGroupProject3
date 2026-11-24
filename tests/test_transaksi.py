@@ -1,4 +1,3 @@
-"""Tes peminjaman pada database uji (Skenario 2, 3, 8; Aturan 1, 2, 3, 7, 8; transaction dan konkurensi)."""
 import unittest
 from datetime import date, timedelta
 from unittest import mock
@@ -79,7 +78,6 @@ class UjiBuatTransaksi(DasarDB):
 
 
 class UjiDuaKlien(DasarDB):
-    """Dua koneksi terpisah mensimulasikan dua komputer yang memakai database yang sama."""
 
     def setUp(self):
         super().setUp()
