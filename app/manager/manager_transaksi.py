@@ -1,4 +1,3 @@
-"""Pembuatan dan pencarian transaksi peminjaman (tabel transaksi dan detail_transaksi)."""
 from datetime import date, timedelta
 from app import validasi
 from app.database import DatabaseError
@@ -10,7 +9,6 @@ from app.repository.repo_transaksi import RepoTransaksi
 
 
 class ManagerTransaksi:
-    """Aturan 1, 2, 3, 7, dan 8 saat membuat transaksi; semua perubahan dalam satu transaction database."""
 
     def __init__(self, db, logger):
         self.db = db
@@ -24,7 +22,6 @@ class ManagerTransaksi:
         return validasi.rapikan(teks).upper()
 
     def buat(self, nim, daftar_kode_alat):
-        """Membuat transaksi berisi satu atau lebih alat; bila ada aturan yang dilanggar, database tidak berubah."""
         nim = self._kunci(nim)
         daftar_kode_alat = [self._kunci(k) for k in daftar_kode_alat]
         if not daftar_kode_alat:
@@ -66,7 +63,6 @@ class ManagerTransaksi:
         return transaksi
 
     def ambil(self, id_transaksi):
-        """Transaksi dengan ID tersebut beserta detailnya; ValueError bila tidak ada."""
         id_transaksi = self._kunci(id_transaksi)
         transaksi = self.repo.ambil(id_transaksi)
         if transaksi is None:
@@ -74,25 +70,19 @@ class ManagerTransaksi:
         return transaksi
 
     def semua(self, batas=None, mulai=0):
-        """Transaksi urut nomor ID; batas/mulai untuk tampilan per halaman."""
         return self.repo.semua(batas, mulai)
 
     def jumlah(self):
-        """Jumlah seluruh transaksi."""
         return self.repo.jumlah()
 
     def cari_berdasarkan_mahasiswa(self, nim):
-        """Transaksi aktif milik seorang mahasiswa."""
         return self.repo.aktif_milik(self._kunci(nim))
 
     def riwayat_mahasiswa(self, nim):
-        """Semua transaksi milik seorang mahasiswa, termasuk yang sudah selesai."""
         return self.repo.riwayat(self._kunci(nim))
 
     def transaksi_aktif_alat(self, kode):
-        """Transaksi yang sedang memegang alat tersebut, atau None."""
         return self.repo.aktif_untuk_alat(self._kunci(kode))
 
     def punya_transaksi_aktif(self, nim):
-        """True bila mahasiswa masih punya transaksi aktif."""
         return self.repo_mahasiswa.jumlah_transaksi_aktif(self._kunci(nim)) > 0
