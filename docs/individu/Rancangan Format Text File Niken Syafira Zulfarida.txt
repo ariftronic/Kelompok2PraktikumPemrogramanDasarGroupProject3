@@ -3,7 +3,7 @@ LAPORAN AKHIR PROYEK II PRAKTIKUM PEMROGRAMAN DASAR
 Aplikasi Peminjaman Alat Laboratorium (Berbasis Text File)
 Kelompok 2 - PTIK, Universitas Sebelas Maret, Semester 3
 =====================================================================
-Penulis      : Niken (NIM K3525038)
+Penulis      : Niken Syafira Zulfarida (NIM K3525038)
 Repo GitHub  : https://github.com/ariftronic/Kelompok2PraktikumPemrogramanDasarGroupProject2
 Periode      : 5 - 12 November 2026
 Commit uji   : 66f7247
